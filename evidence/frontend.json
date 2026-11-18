@@ -1,0 +1,26 @@
+{
+  "chainId": 61999,
+  "address": "0x4D1bcD12BE74c19fE9aaa82f69d8f9271f130c37",
+  "ref": "0x5b40125b27112d589d3e418ffcf56fa5885bec17/frontend-release",
+  "surface": "Production Svelte bundle with DOM runner and EIP-1193 test adapter submitting real transactions",
+  "steps": {
+    "revise": {
+      "hash": "0xe25b5603096d2d023052b141993eac02532155e29eb94ba9bba304f6c3be0989",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": "DRAFT"
+    },
+    "screen": {
+      "hash": "0x4d55e19320c2197770c3623513df3d24551a5ec8c014069bd930b4209c73d0fd",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": "CHECKED"
+    },
+    "publish": {
+      "hash": "0xb0bc4dc0ea368da1b39e217a4c6b41e9bda0500159db8ba8e04123b709c0e33d",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": "PUBLISHED"
+    }
+  }
+}

@@ -35,3 +35,5 @@ Set GitHub Pages to use GitHub Actions to publish the static build. The Svelte a
 For deployment and real-chain validation, supply a dedicated authorized Studionet signer in `DOCKET_STUDIO_KEY` and run `npm run live`. Add `-- --deploy-only` to stop after deployment. The script resumes known hashes from `evidence/studionet.json`. Use a fresh evidence path by moving the existing file outside the workspace before a separate validation run. The app's deployment address and example reference are set in `src/deployment.json`.
 
 [Deployment and transaction evidence](evidence/studionet.json)
+
+[Front-end transaction evidence](evidence/frontend.json) records a separate run of the production bundle. An EIP-1193 test adapter signs and submits real Studionet transactions. Native extension compatibility requires a browser with the corresponding wallet installed.
