@@ -3,6 +3,7 @@
   import { explorer, read, waitFinalized } from './chain.js'
   import { signer, switchNetwork } from './wallet.js'
   import deployment from './deployment.json'
+  import example from '../evidence/studionet.json'
 
   const params = new URLSearchParams(location.search)
   const contract = deployment.address
@@ -19,6 +20,35 @@
   let docket = null
   let revision = null
   let recent = []
+  let baseline = null
+  let screeningHash = ''
+  async function copyDocket() {
+    const target = new URL(location.href)
+    target.search = new URLSearchParams({docket:docket.key,revision:String(revision.version)}).toString()
+    await navigator.clipboard.writeText(target.href)
+    message='Revision link copied'
+  }
+  let comparisonError = ''
+  let changes = []
+  $: changes = baseline && revision ? compare(baseline, revision) : []
+  function compare(before, after) {
+    const oldIds = new Set(before.ids)
+    const newIds = new Set(after.ids)
+    const index = new Map([...before.findings, ...after.findings].map(row => [row.pmid, row]))
+    return [
+      ...before.ids.filter(id => !newIds.has(id)).map(id => ({id, action:'Removed', row:index.get(id)})),
+      ...after.ids.map(id => ({id, action:oldIds.has(id) ? 'Retained' : 'Added', row:index.get(id)})),
+    ]
+  }
+  function exportRevision() {
+    const packet = {chainId:61999,contract,docket,revision,comparedWith:baseline,changes}
+    const url = URL.createObjectURL(new Blob([JSON.stringify(packet,null,2)+'\n'],{type:'application/json'}))
+    const link = document.createElement('a')
+    link.href=url
+    link.download=docket.key.split('/')[1]+'-v'+revision.version+'.json'
+    link.click()
+    setTimeout(()=>URL.revokeObjectURL(url),1000)
+  }
   let historyStart = 1
   let wallets = []
   let selected = ''
@@ -45,7 +75,8 @@
       add(candidate?.isRabby ? 'Rabby' : candidate?.isOKExWallet ? 'OKX' :
         candidate?.isCoinbaseWallet ? 'Coinbase Wallet' : candidate?.isMetaMask ? 'MetaMask' : 'Injected wallet',candidate)
     }
-    if (refFormat.test(reference)) act(() => load(reference))
+    const number = Number(params.get('revision'))
+    if (refFormat.test(reference)) act(() => load(reference,Number.isInteger(number) && number > 0 && number <= 100 ? number : undefined))
     return () => {
       window.removeEventListener('eip6963:announceProvider',announce)
       provider?.removeListener?.('accountsChanged',changed)
@@ -98,6 +129,17 @@
     mode='review'
     historyStart=Math.max(1,chosen-3)
     recent=Array.from({length:Math.min(target.latest-historyStart+1,7)},(_,i)=>historyStart+i)
+    screeningHash=key===example.ref ? example.steps['screen_'+chosen]?.hash ?? '' : ''
+    baseline=null
+    comparisonError=''
+    if (chosen > 1) {
+      try {
+        baseline=await read(contract,'get_version',[key,chosen-1])
+        if (!baseline) comparisonError='Earlier revision unavailable.'
+      } catch {
+        comparisonError='Earlier revision could not be loaded. Reopen this revision to retry.'
+      }
+    }
     message='Finalized revision loaded'
   }
   async function write(method,args,key,version,states) {
@@ -108,6 +150,7 @@
     hash=await client.writeContract({address:contract,functionName:method,args,value:0n,leaderOnly:false})
     await waitFinalized(hash,stage=>{message='Consensus · '+stage})
     await load(key,version)
+    if (method==='screen') screeningHash=hash
     if (!states.includes(revision.state)) throw Error('Finalized readback did not match the expected state.')
     message='FINALIZED / SUCCESS · '+revision.state
   }
@@ -176,8 +219,25 @@
                 {/each}
               </tbody></table>
             </div>
-            <div class="sheet-foot"><p>{descriptions[revision.state]}</p>
+            {#if baseline}
+              <section class="change-panel" aria-label="Changes from previous revision">
+                <div class="change-head"><div><span class="caption">VERSION COMPARISON</span><h3>What changed from v{baseline.version} to v{revision.version}</h3></div><button class="outline" onclick={exportRevision} disabled={busy}>Download evidence JSON</button></div>
+                <ul class="change-list">
+                  {#each changes as item (item.id)}
+                    <li><span class="change-tag" class:removed={item.action==='Removed'} class:added={item.action==='Added'}>{item.action}</span>
+                      <div><a href={'https://pubmed.ncbi.nlm.nih.gov/'+item.id+'/'} target="_blank" rel="noopener">PMID {item.id} ↗</a><p>{item.row?.title || 'Title not captured in this revision'}</p></div>
+                      {#if item.row?.flags.length}<strong class="change-flag">{item.row.flags.join(', ')}</strong>{/if}
+                    </li>
+                  {/each}
+                </ul>
+              </section>
+            {:else if comparisonError}
+              <p class="change-panel">{comparisonError}</p>
+            {/if}
+            <div class="sheet-foot"><div><p>{descriptions[revision.state]}</p>{#if screeningHash}<a href={explorer+'/transactions/'+screeningHash} target="_blank" rel="noopener">View screening receipt ↗</a>{/if}</div>
               <div class="sheet-actions">
+                <button class="outline" onclick={()=>act(copyDocket)} disabled={busy}>Copy revision link</button>
+                {#if !baseline}<button class="outline" onclick={exportRevision} disabled={busy}>Download evidence JSON</button>{/if}
                 {#if revision.version===docket.latest && revision.state==='DRAFT'}<button class="primary" disabled={busy} onclick={()=>act(()=>write('screen',[docket.key,revision.version],docket.key,revision.version,['BLOCKED','CHECKED']))}>Screen with GenLayer</button>{/if}
                 {#if account===docket.owner && revision.version===docket.latest}
                   {#if revision.state==='CHECKED'}<button class="primary" disabled={busy} onclick={()=>act(()=>write('publish',[docket.key,revision.version],docket.key,revision.version,['PUBLISHED']))}>Publish revision</button>{/if}

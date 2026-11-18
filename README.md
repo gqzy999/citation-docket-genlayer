@@ -37,3 +37,7 @@ For deployment and real-chain validation, supply a dedicated authorized Studione
 [Deployment and transaction evidence](evidence/studionet.json)
 
 [Front-end transaction evidence](evidence/frontend.json) records a separate run of the production bundle. An EIP-1193 test adapter signs and submits real Studionet transactions. Native extension compatibility requires a browser with the corresponding wallet installed.
+
+## Compare and share revisions
+
+Open the published example and select **v2**. The comparison lists removed, retained and added PubMed IDs against v1 and includes the previous retraction flag. The example's screening receipt is linked separately from the human-readable table. **Copy revision link** opens the exact revision on a separate browser, and **Download evidence JSON** exports the chain reference, both revision snapshots and their differences.
