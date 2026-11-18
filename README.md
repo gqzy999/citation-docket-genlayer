@@ -1,6 +1,6 @@
 # Citation Docket
 
-[Open Citation Docket](https://gqzy999.github.io/citation-docket-genlayer/) · [Stable Studionet contract](https://explorer-studio.genlayer.com/address/0x4D1bcD12BE74c19fE9aaa82f69d8f9271f130c37)
+[Open Citation Docket](https://gqzy999.github.io/citation-docket-genlayer/) · [Current Stable Studionet v2 contract](https://explorer-studio.genlayer.com/address/0x36599dC45F0c2B8ac5622a6C92E8Cf20B1618D4E) · [V2 chain evidence](evidence/v2.json)
 
 Citation Docket is an editorial release workspace for screening PubMed references. It records the exact citations an editor intended to release, preserves the evidence for blocked drafts, and lets readers compare those drafts with the released revision. A fresh screening requires a new revision, so later source changes leave earlier snapshots intact.
 
