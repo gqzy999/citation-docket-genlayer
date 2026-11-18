@@ -1,4 +1,6 @@
 {
-  "address": "0x4D1bcD12BE74c19fE9aaa82f69d8f9271f130c37",
-  "ref": "0x5b40125b27112d589d3e418ffcf56fa5885bec17/reference-release"
+  "chainId": 61999,
+  "address": "0x36599dC45F0c2B8ac5622a6C92E8Cf20B1618D4E",
+  "ref": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53/editorial-release-v2",
+  "hash": "0xa87ca1f95642d841d5840ce772cb3a07e5f5ee38a3492ab0e5b514a05386ee19"
 }

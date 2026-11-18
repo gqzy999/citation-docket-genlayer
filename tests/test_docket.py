@@ -90,3 +90,38 @@ class DocketTest(unittest.TestCase):
         self.assertEqual(self.version(1)["state"],"SUPERSEDED")
         with self.assertRaisesRegex(ValueError, "CURRENT_DRAFT_REQUIRED"):
             self.contract.screen(self.ref,1)
+
+    def test_notice_aliases_and_concern_block_release(self):
+        for pubtype, flag in [
+            ("Retraction of Publication","NOTICE"),
+            ("Retraction Notice","NOTICE"),
+            ("Expression of Concern","CONCERN"),
+        ]:
+            with self.subTest(pubtype=pubtype):
+                self.setUp()
+                self.screen(1,self.entry("9500320",pubtype))
+                record = self.version(1)
+                self.assertEqual(record["state"],"BLOCKED")
+                self.assertEqual(record["findings"][0]["flags"],[flag])
+                self.assertEqual(record["findings"][0]["publication_types"],[pubtype])
+
+    def test_esummary_missing_uid_entry_blocks_publish(self):
+        self.screen(1,{"result":{"9500320":{"uid":"9500320","error":"cannot get document summary"}}})
+        self.assertEqual(self.version(1)["findings"][0]["flags"],["MISSING"])
+        with self.assertRaisesRegex(ValueError,"CURRENT_CHECKED"):
+            self.contract.publish(self.ref,1)
+
+    def test_public_screening_records_the_actual_signer(self):
+        screener = "0x" + "2"*40
+        self.message.sender_address = screener
+        self.screen(1,self.entry("9500320","Journal Article"))
+        self.message.sender_address = OWNER
+        self.contract.publish(self.ref,1)
+        record = self.version(1)
+        self.assertEqual((record["revised_by"],record["screened_by"],record["published_by"]),(OWNER,screener,OWNER))
+
+    def test_old_checked_revision_cannot_be_published(self):
+        self.screen(1,self.entry("9500320","Journal Article"))
+        self.contract.revise("release","Replacement","16144967",1)
+        with self.assertRaisesRegex(ValueError,"CURRENT_CHECKED"):
+            self.contract.publish(self.ref,1)

@@ -9,9 +9,9 @@
     "test": "python3 -m unittest discover -s tests",
     "dev": "vite",
     "build": "vite build",
-    "live": "node scripts/live.mjs"
+    "live": "node scripts/live.mjs",
+    "acceptance:v2": "node scripts/acceptance-v2.mjs"
   },
-  "license": "ISC",
   "type": "module",
   "private": true,
   "dependencies": {

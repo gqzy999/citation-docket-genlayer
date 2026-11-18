@@ -1,0 +1,347 @@
+{
+  "chainId": 61999,
+  "rpc": "https://studio.genlayer.com/api",
+  "sourceSha256": "65bbb80c53b3edf46a6a75cd2d16ef1d6a10fc2ae6c4b005f1fd285d5318a0ac",
+  "signers": [
+    "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+    "0xfa1a700d57a856d2c0300aa254726c315363f740"
+  ],
+  "steps": {
+    "deployment": {
+      "method": "deploy",
+      "actor": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+      "args": [],
+      "hash": "0xa87ca1f95642d841d5840ce772cb3a07e5f5ee38a3492ab0e5b514a05386ee19",
+      "status": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "execution": "SUCCESS",
+      "readback": {
+        "address": "0x36599dC45F0c2B8ac5622a6C92E8Cf20B1618D4E",
+        "sourceVerified": true
+      },
+      "verified": true
+    },
+    "draft_1": {
+      "method": "revise",
+      "actor": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+      "args": [
+        "editorial-release-v2",
+        "Editorial citations",
+        "20137807,9500320,16144967",
+        0
+      ],
+      "hash": "0x9e33ed008aa683fa4140100b2332b8d67690f790839f828e700179f8ab391cf4",
+      "status": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 1,
+        "title": "Editorial citations",
+        "ids": [
+          "20137807",
+          "9500320",
+          "16144967"
+        ],
+        "state": "DRAFT",
+        "findings": [],
+        "revised_by": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+        "screened_by": null,
+        "published_by": null
+      },
+      "verified": true
+    },
+    "screen_1": {
+      "method": "screen",
+      "actor": "0xfa1a700d57a856d2c0300aa254726c315363f740",
+      "args": [
+        "0x1159e8314dc3be3a442a6bb95d5782af049f0c53/editorial-release-v2",
+        1
+      ],
+      "hash": "0xbb48dc8bda80a1e3847c87849956245abd6bc0b08531c3dc3ca49f7f8f9ac68c",
+      "status": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 1,
+        "title": "Editorial citations",
+        "ids": [
+          "20137807",
+          "9500320",
+          "16144967"
+        ],
+        "state": "BLOCKED",
+        "findings": [
+          {
+            "flags": [
+              "NOTICE"
+            ],
+            "pmid": "20137807",
+            "publication_types": [
+              "Retraction Notice"
+            ],
+            "title": "Retraction--Ileal-lymphoid-nodular hyperplasia, non-specific colitis, and pervasive developmental disorder in children."
+          },
+          {
+            "flags": [
+              "RETRACTED"
+            ],
+            "pmid": "9500320",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, Non-U.S. Gov't",
+              "Retracted Publication"
+            ],
+            "title": "Ileal-lymphoid-nodular hyperplasia, non-specific colitis, and pervasive developmental disorder in children."
+          },
+          {
+            "flags": [],
+            "pmid": "16144967",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, N.I.H., Extramural",
+              "Research Support, Non-U.S. Gov't"
+            ],
+            "title": "Expression of functional nicotinic acetylcholine receptors in rat urinary bladder epithelial cells."
+          }
+        ],
+        "revised_by": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+        "screened_by": "0xfa1a700d57a856d2c0300aa254726c315363f740",
+        "published_by": null
+      },
+      "verified": true
+    },
+    "blocked_publish": {
+      "method": "publish",
+      "actor": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+      "args": [
+        "0x1159e8314dc3be3a442a6bb95d5782af049f0c53/editorial-release-v2",
+        1
+      ],
+      "hash": "0x4a1125aac8761d309df9f6521f35d61cd30294ea3a24f97fd51e2c5cb815b3b7",
+      "status": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "execution": "ERROR",
+      "reason": "CURRENT_CHECKED_REVISION_REQUIRED",
+      "readback": {
+        "version": 1,
+        "title": "Editorial citations",
+        "ids": [
+          "20137807",
+          "9500320",
+          "16144967"
+        ],
+        "state": "BLOCKED",
+        "findings": [
+          {
+            "flags": [
+              "NOTICE"
+            ],
+            "pmid": "20137807",
+            "publication_types": [
+              "Retraction Notice"
+            ],
+            "title": "Retraction--Ileal-lymphoid-nodular hyperplasia, non-specific colitis, and pervasive developmental disorder in children."
+          },
+          {
+            "flags": [
+              "RETRACTED"
+            ],
+            "pmid": "9500320",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, Non-U.S. Gov't",
+              "Retracted Publication"
+            ],
+            "title": "Ileal-lymphoid-nodular hyperplasia, non-specific colitis, and pervasive developmental disorder in children."
+          },
+          {
+            "flags": [],
+            "pmid": "16144967",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, N.I.H., Extramural",
+              "Research Support, Non-U.S. Gov't"
+            ],
+            "title": "Expression of functional nicotinic acetylcholine receptors in rat urinary bladder epithelial cells."
+          }
+        ],
+        "revised_by": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+        "screened_by": "0xfa1a700d57a856d2c0300aa254726c315363f740",
+        "published_by": null
+      },
+      "verified": true
+    },
+    "draft_2": {
+      "method": "revise",
+      "actor": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+      "args": [
+        "editorial-release-v2",
+        "Revised editorial citations",
+        "16873767,16144967",
+        1
+      ],
+      "hash": "0x39e6ebcb66e51e4eac428115d43ca36b88bedec0425c8e4d29a5bd44de4fa3ab",
+      "status": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 2,
+        "title": "Revised editorial citations",
+        "ids": [
+          "16873767",
+          "16144967"
+        ],
+        "state": "DRAFT",
+        "findings": [],
+        "revised_by": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+        "screened_by": null,
+        "published_by": null
+      },
+      "verified": true
+    },
+    "screen_2": {
+      "method": "screen",
+      "actor": "0xfa1a700d57a856d2c0300aa254726c315363f740",
+      "args": [
+        "0x1159e8314dc3be3a442a6bb95d5782af049f0c53/editorial-release-v2",
+        2
+      ],
+      "hash": "0x66f937d71603bf7457e1454f3d8e105fd0c24822436d9a23a8a75b2896a572a5",
+      "status": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 2,
+        "title": "Revised editorial citations",
+        "ids": [
+          "16873767",
+          "16144967"
+        ],
+        "state": "CHECKED",
+        "findings": [
+          {
+            "flags": [],
+            "pmid": "16873767",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, N.I.H., Extramural",
+              "Research Support, Non-U.S. Gov't"
+            ],
+            "title": "Electromagnetic navigation diagnostic bronchoscopy: a prospective study."
+          },
+          {
+            "flags": [],
+            "pmid": "16144967",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, N.I.H., Extramural",
+              "Research Support, Non-U.S. Gov't"
+            ],
+            "title": "Expression of functional nicotinic acetylcholine receptors in rat urinary bladder epithelial cells."
+          }
+        ],
+        "revised_by": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+        "screened_by": "0xfa1a700d57a856d2c0300aa254726c315363f740",
+        "published_by": null
+      },
+      "verified": true
+    },
+    "unauthorized_publish": {
+      "method": "publish",
+      "actor": "0xfa1a700d57a856d2c0300aa254726c315363f740",
+      "args": [
+        "0x1159e8314dc3be3a442a6bb95d5782af049f0c53/editorial-release-v2",
+        2
+      ],
+      "hash": "0x83efaf83ddbcf55a080ae0ac293673dee48b7d086b7b97ec9d0571e6c0af18dd",
+      "status": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "execution": "ERROR",
+      "reason": "OWNER_REQUIRED",
+      "readback": {
+        "version": 2,
+        "title": "Revised editorial citations",
+        "ids": [
+          "16873767",
+          "16144967"
+        ],
+        "state": "CHECKED",
+        "findings": [
+          {
+            "flags": [],
+            "pmid": "16873767",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, N.I.H., Extramural",
+              "Research Support, Non-U.S. Gov't"
+            ],
+            "title": "Electromagnetic navigation diagnostic bronchoscopy: a prospective study."
+          },
+          {
+            "flags": [],
+            "pmid": "16144967",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, N.I.H., Extramural",
+              "Research Support, Non-U.S. Gov't"
+            ],
+            "title": "Expression of functional nicotinic acetylcholine receptors in rat urinary bladder epithelial cells."
+          }
+        ],
+        "revised_by": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+        "screened_by": "0xfa1a700d57a856d2c0300aa254726c315363f740",
+        "published_by": null
+      },
+      "verified": true
+    },
+    "publish_2": {
+      "method": "publish",
+      "actor": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+      "args": [
+        "0x1159e8314dc3be3a442a6bb95d5782af049f0c53/editorial-release-v2",
+        2
+      ],
+      "hash": "0x094b7517f53d701f236e893ab66bf0507352e4b9d04f484ce61dbe8676e7e317",
+      "status": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 2,
+        "title": "Revised editorial citations",
+        "ids": [
+          "16873767",
+          "16144967"
+        ],
+        "state": "PUBLISHED",
+        "findings": [
+          {
+            "flags": [],
+            "pmid": "16873767",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, N.I.H., Extramural",
+              "Research Support, Non-U.S. Gov't"
+            ],
+            "title": "Electromagnetic navigation diagnostic bronchoscopy: a prospective study."
+          },
+          {
+            "flags": [],
+            "pmid": "16144967",
+            "publication_types": [
+              "Journal Article",
+              "Research Support, N.I.H., Extramural",
+              "Research Support, Non-U.S. Gov't"
+            ],
+            "title": "Expression of functional nicotinic acetylcholine receptors in rat urinary bladder epithelial cells."
+          }
+        ],
+        "revised_by": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53",
+        "screened_by": "0xfa1a700d57a856d2c0300aa254726c315363f740",
+        "published_by": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53"
+      },
+      "verified": true
+    }
+  },
+  "address": "0x36599dC45F0c2B8ac5622a6C92E8Cf20B1618D4E",
+  "ref": "0x1159e8314dc3be3a442a6bb95d5782af049f0c53/editorial-release-v2"
+}

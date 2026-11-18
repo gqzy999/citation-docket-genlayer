@@ -7,6 +7,7 @@ API = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&ret
 FLAGS = {
     "retracted publication": "RETRACTED",
     "retraction of publication": "NOTICE",
+    "retraction notice": "NOTICE",
     "expression of concern": "CONCERN",
 }
 
@@ -18,8 +19,9 @@ def normalize(payload, ids):
     rows = []
     for pmid in ids:
         entry = results.get(pmid)
-        if entry is None:
-            rows.append(dict(pmid=pmid, title="", flags=["MISSING"]))
+        if entry is None or (isinstance(entry, dict) and entry.get("uid") == pmid
+                             and entry.get("error") == "cannot get document summary"):
+            rows.append(dict(pmid=pmid, title="", publication_types=[], flags=["MISSING"]))
             continue
         types = entry.get("pubtype")
         title = entry.get("title")
@@ -27,8 +29,9 @@ def normalize(payload, ids):
             raise ValueError("INVALID_PUBMED_ENTRY")
         if not title.strip() or not types or any(not isinstance(t, str) for t in types):
             raise ValueError("INVALID_PUBMED_ENTRY")
+        publication_types = sorted({" ".join(t.split()) for t in types})
         flags = sorted({FLAGS[t.strip().lower()] for t in types if t.strip().lower() in FLAGS})
-        rows.append(dict(pmid=pmid, title=" ".join(title.split())[:300], flags=flags))
+        rows.append(dict(pmid=pmid, title=" ".join(title.split())[:300], publication_types=publication_types, flags=flags))
     return rows
 
 
@@ -57,6 +60,19 @@ class CitationDocket(gl.Contract):
     def get_version(self, key: str, version: u32) -> str:
         return self.versions.get(key + "/" + str(version), "")
 
+    @gl.public.view
+    def get_timeline(self, key: str, first: u32, count: u32) -> str:
+        docket = json.loads(self.dockets.get(key, "null"))
+        if not docket:
+            return "[]"
+        start = max(1, int(first))
+        end = min(start + min(10, int(count)), docket["latest"] + 1)
+        result = []
+        for number in range(start, end):
+            row = json.loads(self.versions[key + "/" + str(number)])
+            result.append(dict(version=number, state=row["state"]))
+        return json.dumps(result)
+
     @gl.public.write
     def revise(self, slug: str, title: str, pmids: str, previous: u32) -> None:
         owner = str(gl.message.sender_address).lower()
@@ -82,7 +98,8 @@ class CitationDocket(gl.Contract):
                 self.versions[key + "/" + str(latest)] = json.dumps(last)
         seq = latest + 1
         self.versions[key + "/" + str(seq)] = json.dumps(
-            dict(version=seq, title=title.strip(), ids=ids, state="DRAFT", findings=[]))
+            dict(version=seq, title=title.strip(), ids=ids, state="DRAFT", findings=[],
+                 revised_by=owner, screened_by=None, published_by=None))
         docket["latest"] = seq
         self.dockets[key] = json.dumps(docket)
 
@@ -112,6 +129,7 @@ class CitationDocket(gl.Contract):
             raise gl.vm.UserError("PUBMED_RESPONSE_UNAVAILABLE")
         findings = json.loads(result)
         revision["findings"] = findings
+        revision["screened_by"] = str(gl.message.sender_address).lower()
         revision["state"] = "BLOCKED" if any(row["flags"] for row in findings) else "CHECKED"
         self.versions[ref] = json.dumps(revision)
 
@@ -125,6 +143,7 @@ class CitationDocket(gl.Contract):
         if docket["latest"] != int(version) or not revision or revision["state"] != "CHECKED":
             raise gl.vm.UserError("CURRENT_CHECKED_REVISION_REQUIRED")
         revision["state"] = "PUBLISHED"
+        revision["published_by"] = docket["owner"]
         docket["published"] = int(version)
         self.versions[ref] = json.dumps(revision)
         self.dockets[key] = json.dumps(docket)

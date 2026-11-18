@@ -49,3 +49,10 @@ footer{font-size:.78rem;color:var(--muted);margin-top:18px}
 .change-tag{justify-self:start;padding:2px 7px;border-radius:4px;background:#eae4f3;color:#503e69;font-weight:700;font-size:.75rem}
 .change-tag.removed{background:#f8dfd4;color:#872e18}.change-tag.added{background:#e2efe7;color:#254f39}.change-flag{color:#872e18;font-size:.75rem}
 @media(max-width:620px){.change-panel{padding:14px}.change-list li{grid-template-columns:70px minmax(0,1fr)}.change-flag{grid-column:2}}
+
+:root{--nav:#192336;--ink:#222b3b;--paper:#fffaf0;--line:#e1d6cc;background:#efebe4;color:var(--ink)}
+.badge.flagged,.change-flag,td.warn{color:#782340}.badge.flagged{background:#f1d8df}
+.types{display:block;margin-top:.25rem;font-size:.78rem;color:var(--muted)}
+.responsibility,.wallet-account{overflow-wrap:anywhere}.responsibility div{display:grid;grid-template-columns:minmax(95px,1fr) 3fr;gap:.7rem;padding:.45rem 0;border-bottom:1px solid var(--line)}.responsibility dt{font-weight:700}.responsibility dd{margin:0}
+.change-panel h3{font:normal 1.35rem Georgia,serif}.wallet-account{font-size:.8rem;margin-bottom:.65rem}
+.workspace>.status{position:sticky;top:0;z-index:2;margin:0 0 1.3rem;background:#e9e1ea}

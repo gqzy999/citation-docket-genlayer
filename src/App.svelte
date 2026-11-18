@@ -4,9 +4,30 @@
   import { signer, switchNetwork } from './wallet.js'
   import deployment from './deployment.json'
   import example from '../evidence/studionet.json'
+  import upgrade from '../evidence/v2.json'
 
   const params = new URLSearchParams(location.search)
-  const contract = deployment.address
+  const legacy = example.address
+  let contract = params.get('contract')===legacy || (!params.has('contract') && params.get('docket')===example.ref)
+    ? legacy : deployment.address
+  let sourceSteps = {}
+  const reasons = {
+    RETRACTED:'PubMed designates the original article as retracted.',
+    NOTICE:'PubMed identifies this item as a retraction notice.',
+    CONCERN:'PubMed indexes an expression of concern.',
+    MISSING:'PubMed did not return a document summary for this PMID.',
+  }
+  let timeline = []
+  let transactionIndex = {}
+  try { transactionIndex=JSON.parse(localStorage.getItem('docket.receipts') ?? '{}') ?? {} } catch {}
+  function receiptsFor(key, version) {
+    const source = [example,upgrade].find(item=>item.address===contract && item.ref===key)
+    return {...transactionIndex[contract+'/'+key+'/'+version],
+      ...Object.fromEntries(['draft','screen','publish'].flatMap(method=>{
+        const hash=source?.steps?.[method+'_'+version]?.hash
+        return hash ? [[method,hash]] : []
+      }))}
+  }
   const refFormat = /^0x[0-9a-f]{40}\/[a-z0-9-]{3,36}$/
   const descriptions = {
     DRAFT:'Ready for independent PubMed screening.',
@@ -24,7 +45,7 @@
   let screeningHash = ''
   async function copyDocket() {
     const target = new URL(location.href)
-    target.search = new URLSearchParams({docket:docket.key,revision:String(revision.version)}).toString()
+    target.search = new URLSearchParams({contract,docket:docket.key,revision:String(revision.version)}).toString()
     await navigator.clipboard.writeText(target.href)
     message='Revision link copied'
   }
@@ -41,7 +62,7 @@
     ]
   }
   function exportRevision() {
-    const packet = {chainId:61999,contract,docket,revision,comparedWith:baseline,changes}
+    const packet = {chainId:61999,contract,docket,revision,receipts:sourceSteps,comparedWith:baseline,changes}
     const url = URL.createObjectURL(new Blob([JSON.stringify(packet,null,2)+'\n'],{type:'application/json'}))
     const link = document.createElement('a')
     link.href=url
@@ -129,7 +150,14 @@
     mode='review'
     historyStart=Math.max(1,chosen-3)
     recent=Array.from({length:Math.min(target.latest-historyStart+1,7)},(_,i)=>historyStart+i)
-    screeningHash=key===example.ref ? example.steps['screen_'+chosen]?.hash ?? '' : ''
+    sourceSteps=receiptsFor(key,chosen)
+    screeningHash=sourceSteps.screen ?? ''
+    timeline=[]
+    if(contract!==legacy){
+      try { timeline=await read(contract,'get_timeline',[key,historyStart,recent.length]) ?? [] } catch {}
+    }
+    timeline=recent.map(number=>timeline.find(item=>item.version===number) ??
+      {version:number,state:number===chosen ? entry.state : undefined})
     baseline=null
     comparisonError=''
     if (chosen > 1) {
@@ -149,10 +177,20 @@
     message='Approve the transaction in your wallet'
     hash=await client.writeContract({address:contract,functionName:method,args,value:0n,leaderOnly:false})
     await waitFinalized(hash,stage=>{message='Consensus · '+stage})
+    const id=contract+'/'+key+'/'+version
+    const operation=method==='revise'?'draft':method
+    transactionIndex={...transactionIndex,[id]:{...transactionIndex[id],[operation]:hash}}
+    try { localStorage.setItem('docket.receipts',JSON.stringify(transactionIndex)) } catch {}
     await load(key,version)
-    if (method==='screen') screeningHash=hash
     if (!states.includes(revision.state)) throw Error('Finalized readback did not match the expected state.')
     message='FINALIZED / SUCCESS · '+revision.state
+  }
+  async function openExample(record) {
+    if (!record.ref) throw Error('Example unavailable')
+    const previous=contract
+    contract=record.address
+    try { await load(record.ref) }
+    catch(error) { contract=previous; throw error }
   }
   async function saveDraft() {
     if (!account) throw Error('Connect a wallet before drafting.')
@@ -170,13 +208,13 @@
     <a class="wordmark" href="./"><span class="mark" aria-hidden="true">¶</span><span>Citation<br />Docket</span></a>
     <div class="nav">
       <button class:active={mode==='review'} onclick={() => mode='review'} disabled={busy}>Docket review</button>
-      <button class:active={mode==='compose'} onclick={() => begin()} disabled={busy}>New docket</button>
+      <button class:active={mode==='compose'} onclick={() => {if(contract!==deployment.address){docket=null;revision=null;baseline=null}contract=deployment.address;begin()}} disabled={busy || !account}>New docket</button>
     </div>
     <div class="rail-bottom"><span class="dot"></span> Stable Studionet <b>61999</b></div>
   </aside>
   <main>
     <header>
-      <p>Editorial workspace</p>
+      <p>Editorial workspace · Stable Studionet 61999<br /><a href={explorer+'/address/'+contract} target="_blank" rel="noopener">Contract explorer ↗</a></p>
       <div class="wallet">
         <select aria-label="Injected wallet" bind:value={selected} onchange={disconnect} disabled={busy || !wallets.length}>
           {#if !wallets.length}<option value="">No injected wallet</option>{/if}
@@ -186,9 +224,11 @@
       </div>
     </header>
     <div class="workspace">
+      <div class="status" role="status">{message}{#if hash} <a href={explorer+'/transactions/'+hash} target="_blank" rel="noopener">Transaction ↗</a>{/if}</div>
+      {#if account}<p class="wallet-account">Connected account · {account}</p>{/if}
       {#if mode==='compose'}
         <h1>Draft a revision</h1>
-        <p class="intro">Record the exact references that an editor plans to release.</p>
+        <p class="intro">Record the exact references that an editor plans to release. Your connected wallet will own this docket's revisions.</p>
         <form class="sheet draft" onsubmit={event=>{event.preventDefault();act(saveDraft)}}>
           <label>Docket slug<input bind:value={slug} required placeholder="editorial-references" /></label>
           <label>Revision title<input bind:value={title} required minlength="3" maxlength="90" placeholder="Reference list for the May issue" /></label>
@@ -201,24 +241,35 @@
         <form class="lookup" onsubmit={event=>{event.preventDefault();act(()=>load(reference))}}>
           <label>Docket reference<input bind:value={reference} required placeholder="0x…/editorial-references" /></label>
           <button class="primary" disabled={busy}>Open docket</button>
-          {#if deployment.ref}<button class="outline" type="button" onclick={()=>act(()=>load(deployment.ref))} disabled={busy}>Open published example</button>{/if}
+          {#if deployment.ref}<button class="outline" type="button" onclick={()=>act(()=>openExample(upgrade.ref ? upgrade : example))} disabled={busy}>Open published example</button>{/if}
+          {#if upgrade.ref}<button class="outline" type="button" onclick={()=>act(()=>openExample(example))} disabled={busy}>Open historical example</button>{/if}
         </form>
         {#if docket && revision}
           <section class="sheet" aria-label="Revision details">
-            <div class="sheet-head"><div><span class="caption">Latest revision {docket.latest} · Released {docket.published || '—'}</span><h2>{revision.title}</h2></div><span class="badge" class:flagged={revision.state==='BLOCKED'}>{revision.state}</span></div>
+            <div class="sheet-head"><div><span class="caption">Latest revision {docket.latest} · Released {docket.published || '—'} · {revision.ids.length} references</span><h2>{revision.title}</h2></div><span class="badge" class:flagged={revision.state==='BLOCKED'}>{revision.state}</span></div>
             <nav aria-label="Revisions">
               {#if historyStart>1}<button onclick={()=>act(()=>load(docket.key,historyStart-1))} disabled={busy}>Earlier</button>{/if}
-              {#each recent as number}<button class:chosen={revision.version===number} onclick={()=>act(()=>load(docket.key,number))} disabled={busy}>v{number}</button>{/each}
+              {#each timeline as item}<button class:chosen={revision.version===item.version} onclick={()=>act(()=>load(docket.key,item.version))} disabled={busy}>v{item.version} {item.state ?? ''}</button>{/each}
               {#if recent.at(-1)<docket.latest}<button onclick={()=>act(()=>load(docket.key,docket.latest))} disabled={busy}>Latest</button>{/if}
             </nav>
             <div class="table-wrap">
               <table><thead><tr><th scope="col">PMID</th><th scope="col">Citation</th><th scope="col">PubMed screening</th></tr></thead><tbody>
                 {#each revision.ids as id,i}
                   {@const row=revision.findings[i]}
-                  <tr><td><a href={'https://pubmed.ncbi.nlm.nih.gov/'+id+'/'} target="_blank" rel="noopener">{id} ↗</a></td><td>{row?.title || '—'}</td><td class:warn={row?.flags.length}>{row ? row.flags.join(', ') || 'No configured flag' : 'Awaiting check'}</td></tr>
+                  <tr><td><a href={'https://pubmed.ncbi.nlm.nih.gov/'+id+'/'} target="_blank" rel="noopener">{id} ↗</a></td><td>{row?.title || '—'}<small class="types">{row?.publication_types?.join(' · ') || (row?'Publication types unavailable in this record':'')}</small></td><td class:warn={row?.flags.length}>{row ? row.flags.join(', ') || 'No configured flag' : 'Awaiting check'}{#each row?.flags ?? [] as flag}<small class="types">{reasons[flag]}</small>{/each}</td></tr>
                 {/each}
               </tbody></table>
             </div>
+            <section class="change-panel" aria-label="Responsibility and evidence">
+              <h3>Responsibility and evidence</h3>
+              <p>{contract===legacy ? 'This historical contract compared ordered PMIDs, titles and risk flags.' : 'Validators read NCBI ESummary independently and compare the ordered PMIDs, titles, publication types and risk flags.'}</p>
+              <p><a href={'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id='+revision.ids.join(',')} target="_blank" rel="noopener">Current NCBI ESummary metadata ↗</a></p>
+              <dl class="responsibility">
+                {#each [['Docket owner',docket.owner,''],['Revised by',revision.revised_by,'draft'],['Screened by',revision.screened_by,'screen'],['Published by',revision.published_by,'publish']] as [label,actor,method]}
+                  <div><dt>{label}</dt><dd>{actor ?? '—'} {#if sourceSteps[method]}<a href={explorer+'/transactions/'+sourceSteps[method]} target="_blank" rel="noopener">Transaction ↗</a>{/if}</dd></div>
+                {/each}
+              </dl>
+            </section>
             {#if baseline}
               <section class="change-panel" aria-label="Changes from previous revision">
                 <div class="change-head"><div><span class="caption">VERSION COMPARISON</span><h3>What changed from v{baseline.version} to v{revision.version}</h3></div><button class="outline" onclick={exportRevision} disabled={busy}>Download evidence JSON</button></div>
@@ -235,11 +286,12 @@
               <p class="change-panel">{comparisonError}</p>
             {/if}
             <div class="sheet-foot"><div><p>{descriptions[revision.state]}</p>{#if screeningHash}<a href={explorer+'/transactions/'+screeningHash} target="_blank" rel="noopener">View screening receipt ↗</a>{/if}</div>
+              <p>{revision.state==='DRAFT'?'Any connected wallet can screen this draft. A flagged citation blocks publication.':revision.state==='CHECKED'?'Only the docket owner can publish this checked revision.':''}</p>
               <div class="sheet-actions">
                 <button class="outline" onclick={()=>act(copyDocket)} disabled={busy}>Copy revision link</button>
                 {#if !baseline}<button class="outline" onclick={exportRevision} disabled={busy}>Download evidence JSON</button>{/if}
-                {#if revision.version===docket.latest && revision.state==='DRAFT'}<button class="primary" disabled={busy} onclick={()=>act(()=>write('screen',[docket.key,revision.version],docket.key,revision.version,['BLOCKED','CHECKED']))}>Screen with GenLayer</button>{/if}
-                {#if account===docket.owner && revision.version===docket.latest}
+                {#if contract!==legacy && account && revision.version===docket.latest && revision.state==='DRAFT'}<button class="primary" disabled={busy} onclick={()=>act(()=>write('screen',[docket.key,revision.version],docket.key,revision.version,['BLOCKED','CHECKED']))}>Screen with GenLayer</button>{/if}
+                {#if contract!==legacy && account===docket.owner && revision.version===docket.latest}
                   {#if revision.state==='CHECKED'}<button class="primary" disabled={busy} onclick={()=>act(()=>write('publish',[docket.key,revision.version],docket.key,revision.version,['PUBLISHED']))}>Publish revision</button>{/if}
                   <button class="outline" disabled={busy} onclick={()=>begin(true)}>New revision</button>
                 {/if}
@@ -250,7 +302,6 @@
           <section class="empty"><span aria-hidden="true">¶</span><h2>Open a docket to see its revisions</h2><p>Each screening snapshot includes the PubMed records behind the release decision.</p></section>
         {/if}
       {/if}
-      <div class="status" role="status">{message}{#if hash} <a href={explorer+'/transactions/'+hash} target="_blank" rel="noopener">Transaction ↗</a>{/if}</div>
       <footer>PubMed metadata screening · Editorial decisions remain with the publishing team.</footer>
     </div>
   </main>
