@@ -1,0 +1,128 @@
+{
+  "chainId": 61999,
+  "owner": "0x5b40125b27112d589d3e418ffcf56fa5885bec17",
+  "ref": "0x5b40125b27112d589d3e418ffcf56fa5885bec17/reference-release",
+  "sourceSha256": "60ff82710f05a3bf42b9e96cba0d258c2e06847c77fafa2cd550d8275f29e5b5",
+  "steps": {
+    "deployment": {
+      "hash": "0x9ca03e884fe0740c1f5254bfed446c9cb9a49d7ac54b7a967b72e12660a3c3a9",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": {
+        "address": "0x4D1bcD12BE74c19fE9aaa82f69d8f9271f130c37",
+        "sourceVerified": true
+      }
+    },
+    "draft_1": {
+      "hash": "0x999a15ff47087d189ecf4a5f7666ff9dd459a0e8e10982242948184a9df687ea",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 1,
+        "title": "Editorial references",
+        "ids": [
+          "9500320",
+          "16144967"
+        ],
+        "state": "DRAFT",
+        "findings": []
+      }
+    },
+    "screen_1": {
+      "hash": "0x77c3acd191a8ca2b95e572b308b4d937f7763765527dcd52975b230f4ebdbbe5",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 1,
+        "title": "Editorial references",
+        "ids": [
+          "9500320",
+          "16144967"
+        ],
+        "state": "BLOCKED",
+        "findings": [
+          {
+            "flags": [
+              "RETRACTED"
+            ],
+            "pmid": "9500320",
+            "title": "Ileal-lymphoid-nodular hyperplasia, non-specific colitis, and pervasive developmental disorder in children."
+          },
+          {
+            "flags": [],
+            "pmid": "16144967",
+            "title": "Expression of functional nicotinic acetylcholine receptors in rat urinary bladder epithelial cells."
+          }
+        ]
+      }
+    },
+    "draft_2": {
+      "hash": "0x7cb324260da15d775bdf68dabc70e88c96ea2b6d6f26378440e08d627e8a0a9b",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 2,
+        "title": "Editorial references, revised",
+        "ids": [
+          "16873767",
+          "16144967"
+        ],
+        "state": "DRAFT",
+        "findings": []
+      }
+    },
+    "screen_2": {
+      "hash": "0xda617c49c465bb9cc2b72bdbc40af04b9427478cf4deee0c1393c50708319c36",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 2,
+        "title": "Editorial references, revised",
+        "ids": [
+          "16873767",
+          "16144967"
+        ],
+        "state": "CHECKED",
+        "findings": [
+          {
+            "flags": [],
+            "pmid": "16873767",
+            "title": "Electromagnetic navigation diagnostic bronchoscopy: a prospective study."
+          },
+          {
+            "flags": [],
+            "pmid": "16144967",
+            "title": "Expression of functional nicotinic acetylcholine receptors in rat urinary bladder epithelial cells."
+          }
+        ]
+      }
+    },
+    "publish_2": {
+      "hash": "0xd141de237956a1a3fd1f64dcfbe1cab51e79bdd41220603e5a81268f7a960deb",
+      "status": "FINALIZED",
+      "execution": "SUCCESS",
+      "readback": {
+        "version": 2,
+        "title": "Editorial references, revised",
+        "ids": [
+          "16873767",
+          "16144967"
+        ],
+        "state": "PUBLISHED",
+        "findings": [
+          {
+            "flags": [],
+            "pmid": "16873767",
+            "title": "Electromagnetic navigation diagnostic bronchoscopy: a prospective study."
+          },
+          {
+            "flags": [],
+            "pmid": "16144967",
+            "title": "Expression of functional nicotinic acetylcholine receptors in rat urinary bladder epithelial cells."
+          }
+        ]
+      }
+    }
+  },
+  "address": "0x4D1bcD12BE74c19fE9aaa82f69d8f9271f130c37"
+}

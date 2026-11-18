@@ -1,0 +1,25 @@
+{
+  "name": "citation-docket",
+  "version": "1.0.0",
+  "description": "Revision-based PubMed screening on GenLayer",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "python3 -m unittest discover -s tests",
+    "dev": "vite",
+    "build": "vite build",
+    "live": "node scripts/live.mjs"
+  },
+  "license": "ISC",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "genlayer-js": "1.1.8",
+    "svelte": "5.38.7"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "5.1.1",
+    "vite": "6.4.1"
+  }
+}
